@@ -1,86 +1,69 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم Akad Digital</title>
+    <title>لوحة تحكم Akad Digital - دخول مباشر</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
         .admin-container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
-        h2 { color: #2c3e50; border-bottom: 2px solid #00ff88; padding-bottom: 10px; }
-        
+        h2 { color: #2c3e50; border-bottom: 2px solid #00ff88; padding-bottom: 10px; margin-top: 30px; }
         .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        
-        button { background: #2c3e50; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; }
-        button:hover { background: #1a252f; }
-        
-        .product-list { margin-top: 40px; }
-        .item-card { background: #fff; border: 1px solid #eee; padding: 15px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .btn-delete { background: #ff4757; width: auto; padding: 5px 15px; }
-
-        #loginSection { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #2c3e50; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
-        .hidden { display: none; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #444; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; background: #fafafa; }
+        button { background: #2c3e50; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.3s; }
+        button:hover { background: #00ff88; color: #000; }
+        .item-card { background: #fff; border: 1px solid #eee; padding: 15px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border-right: 5px solid #00ff88; }
+        .btn-delete { background: #ff4757; width: auto; padding: 5px 15px; font-size: 0.8rem; }
+        .header-bar { display: flex; justify-content: space-between; align-items: center; background: #2c3e50; color: white; padding: 15px 30px; border-radius: 15px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-    <div id="loginSection">
-        <h1 style="color: #00ff88;">Akad Digital Admin</h1>
-        <div style="width: 300px;">
-            <input type="email" id="adminEmail" placeholder="البريد الإلكتروني" style="margin-bottom: 10px;">
-            <input type="password" id="adminPass" placeholder="كلمة المرور" style="margin-bottom: 10px;">
-            <button onclick="login()">دخول</button>
+    <div class="admin-container">
+        <div class="header-bar">
+            <h1 style="margin:0; font-size: 1.5rem;">لوحة إدارة Akad Digital Store</h1>
+            <span style="color: #00ff88;">● متصل الآن</span>
         </div>
-    </div>
 
-    <div id="adminPanel" class="admin-container hidden">
-        <h2>إضافة منتج جديد (TV Box, كاميرات، إلخ)</h2>
-        
+        <h2>إضافة منتج جديد</h2>
         <div class="form-group">
-            <label>اسم المنتج</label>
-            <input type="text" id="pName" placeholder="مثلاً: X96Q Android Box">
+            <label>اسم المنتج (مثلاً: X96Q Box)</label>
+            <input type="text" id="pName">
         </div>
-
         <div class="form-group">
             <label>القسم</label>
             <select id="pCat"></select>
         </div>
-
         <div class="form-group">
-            <label>السعر</label>
-            <input type="text" id="pPrice" placeholder="مثلاً: 45,000 د.ع">
+            <label>السعر (مثلاً: 45,000 د.ع)</label>
+            <input type="text" id="pPrice">
         </div>
-
         <div class="form-group">
-            <label>رابط صورة المنتج</label>
-            <input type="text" id="pImg" placeholder="أدخل رابط صورة PNG أو JPG">
+            <label>رابط الصورة</label>
+            <input type="text" id="pImg" placeholder="انسخ رابط صورة الجهاز هنا">
         </div>
-
         <div class="form-group">
-            <label>المواصفات (الوصف)</label>
-            <textarea id="pNotes" rows="3" placeholder="المعالج، الرام، الذاكرة..."></textarea>
+            <label>المواصفات المختصرة</label>
+            <textarea id="pNotes" rows="2"></textarea>
         </div>
+        <button onclick="addProduct()">نشر المنتج في المتجر 🚀</button>
 
-        <button onclick="addProduct()">حفظ ونشر المنتج ✅</button>
-
-        <hr>
+        <hr style="margin: 40px 0; border: 0; border-top: 1px solid #eee;">
 
         <h2>إدارة الأقسام</h2>
+        <p style="font-size: 0.8rem; color: #666;">(يجب إضافة قسم واحد على الأقل أولاً)</p>
         <div style="display: flex; gap: 10px;">
-            <input type="text" id="newCat" placeholder="اسم القسم الجديد">
-            <button onclick="addCategory()" style="width: auto;">إضافة قسم</button>
+            <input type="text" id="newCat" placeholder="اسم القسم الجديد (مثلاً: كاميرات)">
+            <button onclick="addCategory()" style="width: auto;">إضافة</button>
         </div>
 
         <div class="product-list">
-            <h2>المنتجات الحالية</h2>
+            <h2>المنتجات المنشورة</h2>
             <div id="currentProducts"></div>
         </div>
     </div>
@@ -96,22 +79,12 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const auth = firebase.auth();
 
-        // تسجيل الدخول
-        function login() {
-            const email = document.getElementById('adminEmail').value;
-            const pass = document.getElementById('adminPass').value;
-            auth.signInWithEmailAndPassword(email, pass)
-                .then(() => {
-                    document.getElementById('loginSection').classList.add('hidden');
-                    document.getElementById('adminPanel').classList.remove('hidden');
-                    loadData();
-                })
-                .catch(err => alert("خطأ في الدخول: " + err.message));
-        }
+        // تحميل البيانات فوراً عند فتح الصفحة
+        window.onload = function() {
+            loadData();
+        };
 
-        // إضافة قسم
         function addCategory() {
             const name = document.getElementById('newCat').value;
             if(name) {
@@ -120,47 +93,42 @@
             }
         }
 
-        // إضافة منتج
         function addProduct() {
             const product = {
                 name: document.getElementById('pName').value,
                 cat: document.getElementById('pCat').value,
-                ver: document.getElementById('pPrice').value, // حقل السعر
+                ver: document.getElementById('pPrice').value,
                 img: document.getElementById('pImg').value,
                 notes: document.getElementById('pNotes').value,
-                url: "#" // رابط افتراضي
+                url: "#"
             };
 
             if(product.name && product.cat) {
                 db.ref('apps').push(product).then(() => {
-                    alert("تمت إضافة المنتج بنجاح!");
-                    document.querySelectorAll('input').forEach(i => i.value = "");
+                    alert("تم النشر بنجاح!");
+                    document.getElementById('pName').value = "";
+                    document.getElementById('pPrice').value = "";
+                    document.getElementById('pImg').value = "";
+                    document.getElementById('pNotes').value = "";
                 });
             } else {
-                alert("يرجى ملء الاسم والقسم على الأقل");
+                alert("يرجى ملء الاسم والقسم");
             }
         }
 
-        // تحميل البيانات للوحة
         function loadData() {
-            // جلب الأقسام للقائمة المنسدلة
             db.ref('categories').on('value', s => {
                 let options = "";
-                s.forEach(c => {
-                    options += `<option value="${c.val().name}">${c.val().name}</option>`;
-                });
+                s.forEach(c => { options += `<option value="${c.val().name}">${c.val().name}</option>`; });
                 document.getElementById('pCat').innerHTML = options;
             });
 
-            // جلب المنتجات لعرضها وحذفها
             db.ref('apps').on('value', s => {
                 let html = "";
                 s.forEach(p => {
                     html += `
                     <div class="item-card">
-                        <div>
-                            <strong>${p.val().name}</strong> - ${p.val().ver}
-                        </div>
+                        <div><strong>${p.val().name}</strong> - <span style="color:#2ecc71">${p.val().ver}</span></div>
                         <button class="btn-delete" onclick="deleteItem('${p.key}')">حذف</button>
                     </div>`;
                 });
@@ -169,7 +137,7 @@
         }
 
         function deleteItem(id) {
-            if(confirm("هل أنت متأكد من حذف هذا المنتج؟")) {
+            if(confirm("هل تريد حذف هذا المنتج؟")) {
                 db.ref('apps').child(id).remove();
             }
         }
