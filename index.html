@@ -11,114 +11,30 @@
 
     <style>
         :root { --main-bg: #0b0f12; --card-bg: rgba(22, 27, 32, 0.8); --accent: #00ff88; --text: #ffffff; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--main-bg); color: var(--text); margin: 0; padding: 20px; overflow-x: hidden; }
-        
-        header { text-align: center; padding: 40px 0; }
-        .logo-title { font-size: 2.5rem; font-weight: bold; color: var(--accent); text-shadow: 0 0 15px rgba(0,255,136,0.5); margin: 0; }
-        .sub-title { color: #888; margin-top: 10px; }
-
-        .search-box { width: 100%; max-width: 500px; margin: 20px auto; position: relative; }
-        .search-box input { width: 100%; padding: 15px 25px; border-radius: 30px; border: 1px solid #2d353b; background: #161b20; color: #fff; outline: none; }
-
-        .category-container { display: flex; overflow-x: auto; gap: 10px; padding: 10px; justify-content: center; margin-bottom: 30px; }
-        .cat-btn { padding: 8px 20px; border-radius: 20px; background: #1c2329; border: 1px solid #2d353b; color: #fff; cursor: pointer; white-space: nowrap; transition: 0.3s; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--main-bg); color: var(--text); margin: 0; padding: 20px; direction: rtl; }
+        header { text-align: center; padding: 30px 0; }
+        .logo-title { font-size: 2.2rem; color: var(--accent); text-shadow: 0 0 15px rgba(0,255,136,0.3); margin: 0; }
+        .category-container { display: flex; overflow-x: auto; gap: 10px; padding: 15px; justify-content: center; }
+        .cat-btn { padding: 8px 20px; border-radius: 20px; background: #1c2329; border: 1px solid #2d353b; color: #fff; cursor: pointer; transition: 0.3s; }
         .cat-btn.active { background: var(--accent); color: #000; font-weight: bold; }
-
-        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; max-width: 1200px; margin: 0 auto; }
-        
-        .product-card { 
-            background: var(--card-bg); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
-            padding: 20px; text-align: center; backdrop-filter: blur(10px); transition: 0.3s;
-        }
-        .product-img { width: 100%; height: 180px; object-fit: contain; border-radius: 15px; margin-bottom: 15px; background: #fff; padding: 10px; box-sizing: border-box; }
-        .price-tag { font-size: 1.3rem; color: var(--accent); font-weight: bold; margin: 10px 0; }
-        .specs { font-size: 0.9rem; color: #aaa; height: 50px; overflow: hidden; margin-bottom: 15px; }
-
-        .buy-btn { 
-            display: block; width: 100%; padding: 12px; border-radius: 12px; background: #25d366; 
-            color: #fff; text-decoration: none; font-weight: bold; transition: 0.3s;
-        }
-        .buy-btn:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(37,211,102,0.4); }
-
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 1200px; margin: 20px auto; }
+        .product-card { background: var(--card-bg); border-radius: 15px; padding: 15px; text-align: center; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
+        .product-img { width: 100%; height: 160px; object-fit: contain; border-radius: 10px; background: #fff; margin-bottom: 15px; }
+        .price { font-size: 1.2rem; color: var(--accent); font-weight: bold; }
+        .buy-btn { display: block; background: #25d366; color: white; padding: 10px; border-radius: 8px; text-decoration: none; margin-top: 15px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1 class="logo-title">AKAD DIGITAL STORE</h1>
-        <p class="sub-title">أكد للتقنية الرقمية - TV Box | ستلايت | كاميرات | إنارة سمارت</p>
-    </header>
+<header>
+    <h1 class="logo-title">AKAD DIGITAL STORE</h1>
+    <p style="color: #888;">أكد للتقنية الرقمية - بوابتك لأحدث الأجهزة</p>
+</header>
 
-    <div class="search-box">
-        <input type="text" id="searchInput" placeholder="ابحث عن منتج..." oninput="filterProducts()">
-    </div>
+<div class="category-container" id="categoryTabs"></div>
+<div class="products-grid" id="productsDisplay"></div>
 
-    <div class="category-container" id="categoryTabs"></div>
-
-    <div class="products-grid" id="productsDisplay"></div>
-
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBcWwHSDX9kWVxbw1DLgGkTJoYFSBsdeuk",
-            authDomain: "aws-store-aaf40.firebaseapp.com",
-            databaseURL: "https://aws-store-aaf40-default-rtdb.firebaseio.com",
-            projectId: "aws-store-aaf40",
-            appId: "1:962301504605:web:96661f5c465b2cfd4331b4"
-        };
-
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        let allProducts = [];
-        let activeCat = "الكل";
-
-        // جلب البيانات
-        db.ref('categories').on('value', s => {
-            let html = `<button class="cat-btn ${activeCat==='الكل'?'active':''}" onclick="setCat('الكل')">الكل</button>`;
-            s.forEach(c => {
-                const n = c.val().name;
-                html += `<button class="cat-btn ${activeCat===n?'active':''}" onclick="setCat('${n}')">${n}</button>`;
-            });
-            document.getElementById('categoryTabs').innerHTML = html;
-        });
-
-        db.ref('apps').on('value', s => {
-            allProducts = [];
-            s.forEach(c => { allProducts.push({id: c.key, ...c.val()}); });
-            render();
-        });
-
-        function setCat(c) { activeCat = c; render(); }
-
-        function render() {
-            const display = document.getElementById('productsDisplay');
-            let html = "";
-            const filtered = allProducts.filter(p => (activeCat === 'الكل' || p.cat === activeCat));
-            
-            filtered.forEach(p => {
-                html += `
-                <div class="product-card" data-tilt>
-                    <img src="${p.img || 'https://via.placeholder.com/150'}" class="product-img">
-                    <h3>${p.name}</h3>
-                    <div class="price-tag">${p.ver}</div>
-                    <div class="specs">${p.notes}</div>
-                    <a href="https://wa.me/9647700000000?text=أريد طلب: ${p.name}" target="_blank" class="buy-btn">🛒 اطلب عبر واتساب</a>
-                </div>`;
-            });
-            display.innerHTML = html;
-            VanillaTilt.init(document.querySelectorAll(".product-card"));
-        }
-
-        function filterProducts() {
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            const cards = document.querySelectorAll('.product-card');
-            cards.forEach(card => {
-                const name = card.querySelector('h3').innerText.toLowerCase();
-                card.style.display = name.includes(term) ? "block" : "none";
-            });
-        }
-    </script>
-</body>
-</html>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBcWwHSDX9kWVxbw1DLgGkTJoYFSBsdeuk",
+        authDomain: "aws-store-aaf40.firebaseapp.com",
